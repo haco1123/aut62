@@ -1,0 +1,5 @@
+train
+test
+file.txt
+*.log
+*.ipynb
