@@ -2,7 +2,6 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers, regularizers
 from tensorflow.keras.datasets import cifar100
-
 import matplotlib.pyplot as plt
 import numpy as np
 import random
@@ -57,13 +56,13 @@ def train_cnn(model, train_data, test_data, train_labels):
     plt.ylabel('Genauigkeit')
     plt.legend()
     plt.grid(True)
-    plt.title('Genauigkeit mit Dropout und L1 Regularisierung')
+    plt.title('Genauigkeit mit Dropout und L2 Regularisierung')
     plt.show()
 
 
 # Aufgabe 4
-## Regulierung mit Dropout
-def create_cnn_dropout_l1_regularization():
+## Regulierung mit Dropout und L2 Regularisierung
+def create_cnn_dropout_l2_regularization():
     # Modell initialisieren
     model = keras.Sequential()
 
@@ -81,7 +80,7 @@ def create_cnn_dropout_l1_regularization():
 
     # Klassifikation
     model.add(layers.Flatten())
-    model.add(layers.Dense(256, activation='relu', kernel_regularizer=regularizers.l1(1e-5)))  # L1 Regularisierung
+    model.add(layers.Dense(256, activation='relu', kernel_regularizer=regularizers.l2(0.0001)))  # L2 Regularisierung
     model.add(layers.Dropout(0.5))  # Regulierung mit Dropout
     model.add(layers.Dense(100, activation='softmax'))  # 100 Klassen
     
@@ -97,6 +96,6 @@ def create_cnn_dropout_l1_regularization():
 train_data, train_labels, test_data, test_labels, class_names = load_cifar100()
 # create_grid(train_data, train_labels, class_names)
 
-# Erstellen und Trainieren des CNN mit Dropout Regularisierung
-model_dropout_l1 = create_cnn_dropout_l1_regularization()
-train_cnn(model_dropout_l1, train_data, test_data, train_labels)
+# Erstellen und Trainieren des CNN mit Dropout und L2 Regularisierung
+model_dropout_l2 = create_cnn_dropout_l2_regularization()
+train_cnn(model_dropout_l2, train_data, test_data, train_labels)

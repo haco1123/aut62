@@ -2,12 +2,10 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.datasets import cifar100
 from tensorflow.keras import layers
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import matplotlib.pyplot as plt
-import numpy as np
 import random
 
-tf.random.set_seed(0)  # Reproduzierbarkeit
+#tf.random.set_seed(0)  # Reproduzierbarkeit
 
 # Aufgabe 1
 # Klassennamen aus der Meta-Datei laden und als Dictionary speichern
@@ -44,7 +42,7 @@ def create_cnn_without_regularization():
     model = keras.Sequential()
 
     # Layer 1
-    model.add(layers.Conv2D(32, (3, 3), input_shape=(32, 32, 3), activation='relu', padding='same')) # Alle Bilder von CIFAR-100 haben die Eingabeform: 32x32 Pixel, 3 Farbkanäle (RGB)
+    model.add(layers.Conv2D(32, (3, 3), activation='relu', padding='same', input_shape=(32, 32, 3))) # Alle Bilder von CIFAR-100 haben die Eingabeform: 32x32 Pixel, 3 Farbkanäle (RGB)
     model.add(layers.MaxPooling2D((2, 2)))
 
     # Layer 2
@@ -65,7 +63,7 @@ def create_cnn_without_regularization():
                 loss='sparse_categorical_crossentropy',
                 metrics=['accuracy'])
     
-    model.summary()  # Modellübersicht anzeigen
+    model.summary() # Modellübersicht anzeigen
     return model
 
 
@@ -92,80 +90,9 @@ def train_cnn(model, train_data, test_data, train_labels):
     plt.show()
 
 
-# Aufgabe 4
-## Regulierung mit Dropout
-def create_cnn_dropout_regularization():
-    # Modell initialisieren
-    model = keras.Sequential()
-
-    # Layer 1
-    model.add(layers.Conv2D(32, (3, 3), input_shape=(32, 32, 3), activation='relu', padding='same')) # Alle Bilder von CIFAR-100 haben die Eingabeform: 32x32 Pixel, 3 Farbkanäle (RGB)
-    model.add(layers.MaxPooling2D((2, 2)))
-
-    # Layer 2
-    model.add(layers.Conv2D(64, (3, 3), activation='relu', padding='same'))
-    model.add(layers.MaxPooling2D((2, 2)))
-
-    # Layer 3
-    model.add(layers.Conv2D(128, (3, 3), activation='relu', padding='same'))
-    model.add(layers.MaxPooling2D((2, 2)))
-
-    # Klassifikation
-    model.add(layers.Flatten())
-    model.add(layers.Dense(256, activation='relu'))
-    model.add(layers.Dropout(0.5))  # Regulierung mit Dropout
-    model.add(layers.Dense(100, activation='softmax'))  # 100 Klassen
-    
-    # Kompilieren
-    model.compile(optimizer='adam',
-                loss='sparse_categorical_crossentropy',
-                metrics=['accuracy'])
-    
-    model.summary()  # Modellübersicht anzeigen
-    return model
-
-
-## Regulierung mit Data Augmentation
-def create_cnn_l1_regularization():
-    # Modell initialisieren
-    model = keras.Sequential()
-
-    # Layer 1
-    model.add(layers.Conv2D(32, (3, 3), input_shape=(32, 32, 3), activation='relu', padding='same')) # Alle Bilder von CIFAR-100 haben die Eingabeform: 32x32 Pixel, 3 Farbkanäle (RGB)
-    model.add(layers.MaxPooling2D((2, 2)))
-
-    # Layer 2
-    model.add(layers.Conv2D(64, (3, 3), activation='relu', padding='same'))
-    model.add(layers.MaxPooling2D((2, 2)))
-
-    # Layer 3
-    model.add(layers.Conv2D(128, (3, 3), activation='relu', padding='same'))
-    model.add(layers.MaxPooling2D((2, 2)))
-
-    # Klassifikation
-    model.add(layers.Flatten())
-    model.add(layers.Dense(256, activation='relu'))
-    model.add(layers.Dropout(0.5))  # Regulierung mit Dropout
-    model.add(layers.Dense(100, activation='softmax'))  # 100 Klassen
-    
-    # Kompilieren
-    model.compile(optimizer='adam',
-                loss='sparse_categorical_crossentropy',
-                metrics=['accuracy'])
-    
-    model.summary()  # Modellübersicht anzeigen
-    return model
-
 train_data, train_labels, test_data, test_labels, class_names = load_cifar100()
 # create_grid(train_data, train_labels, class_names)
 
 # Erstellen und Trainieren des CNN ohne Regularisierung
 model = create_cnn_without_regularization()
 train_cnn(model, train_data, test_data, train_labels)
-
-# Erstellen und Trainieren des CNN mit Dropout Regularisierung
-# model_dropout = create_cnn_dropout_regularization()
-# train_cnn(model_dropout, train_data, test_data, train_labels)
-# Erstellen und Trainieren des CNN mit L1 Regularisierung
-# model_l1 = create_cnn_l1_regularization()
-# train_cnn(model_l1, train_data, test_data, train_labels)
