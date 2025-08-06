@@ -6,6 +6,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 
+from sklearn.model_selection import train_test_split
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+
 #tf.random.set_seed(0)  # Reproduzierbarkeit
 
 # Aufgabe 1
@@ -40,16 +43,46 @@ def create_grid(images, labels, class_names):
 # Aufgabe 3
 ## Daten Normalisieren & Splitten
 def train_cnn(model, train_data, test_data, train_labels):
+    # Normalisierung
     train_data = train_data.astype('float32') / 255.0
     test_data = test_data.astype('float32') / 255.0
 
-    # Training mit 20% Validierung
-    history = model.fit(train_data, train_labels,
-                        epochs=50,
-                        validation_split=0.2,
-                        batch_size=64)
+    # Aufteilen in Training und Validierung
+    train_data, val_data, train_labels, val_labels = train_test_split(
+    train_data, train_labels, test_size=0.2, random_state=42)
 
-    ## Visualisierung der Genauigkeit
+    # Data Augmentation für Training
+    train_datagen = ImageDataGenerator(
+        rotation_range=15,
+        width_shift_range=0.1,
+        height_shift_range=0.1,
+        horizontal_flip=True
+    )   
+    #datagen.fit(train_data)
+
+    # Kein Augmentieren für Validierung
+    val_datagen = ImageDataGenerator()
+
+    # Generatoren erstellen
+    batch_size = 64
+    train_generator = train_datagen.flow(train_data, train_labels, batch_size=batch_size)
+    val_generator = val_datagen.flow(val_data, val_labels, batch_size=batch_size)
+
+    # Modell trainieren
+    history = model.fit(
+        train_generator,
+        epochs=50,
+        validation_data=val_generator,
+        steps_per_epoch=len(train_generator),
+        validation_steps=len(val_generator)
+    )
+    # Training mit 20% Validierung
+    # history = model.fit(train_data, train_labels,
+    #                     epochs=50,
+    #                     validation_split=0.2,
+    #                     batch_size=64)
+
+    # Visualisierung der Genauigkeit
     plt.plot(history.history['val_accuracy'], label='Validierungsgenauigkeit')
     #plt.plot(history.history['accuracy'], label='Trainingsgenauigkeit')
     plt.xlabel('Epoche')
@@ -67,15 +100,18 @@ def create_cnn_dropout_l2_regularization():
     model = keras.Sequential()
 
     # Layer 1
-    model.add(layers.Conv2D(32, (3, 3), activation='relu', padding='same', input_shape=(32, 32, 3))) # Alle Bilder von CIFAR-100 haben die Eingabeform: 32x32 Pixel, 3 Farbkanäle (RGB)
+    model.add(layers.Conv2D(64, (3, 3), activation='relu', padding='same', input_shape=(32, 32, 3))) # Alle Bilder von CIFAR-100 haben die Eingabeform: 32x32 Pixel, 3 Farbkanäle (RGB)
+    model.add(layers.BatchNormalization())
     model.add(layers.MaxPooling2D((2, 2)))
 
     # Layer 2
-    model.add(layers.Conv2D(64, (3, 3), activation='relu', padding='same'))
+    model.add(layers.Conv2D(128, (3, 3), activation='relu', padding='same'))
+    model.add(layers.BatchNormalization())
     model.add(layers.MaxPooling2D((2, 2)))
 
     # Layer 3
-    model.add(layers.Conv2D(128, (3, 3), activation='relu', padding='same'))
+    model.add(layers.Conv2D(256, (3, 3), activation='relu', padding='same'))
+    model.add(layers.BatchNormalization())
     model.add(layers.MaxPooling2D((2, 2)))
 
     # Klassifikation
